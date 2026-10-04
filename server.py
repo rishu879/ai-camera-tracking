@@ -41,6 +41,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
+START_TIME = time.perf_counter()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -231,6 +233,49 @@ runner = SystemRunner()
 
 
 # --- REST & Streaming APIs ---
+
+class HealthResponse(BaseModel):
+    status: str = "ok"
+    uptime_seconds: float
+    timestamp: float
+
+
+class ReadinessResponse(BaseModel):
+    ready: bool
+    worker_alive: bool
+    detector_ready: bool
+    frames_processed: int
+    fps: float
+    tracking_error_px: float
+
+
+@app.get("/health", response_model=HealthResponse)
+def health_check():
+    """Liveness probe confirming the HTTP server is alive."""
+    uptime = time.perf_counter() - START_TIME
+    return HealthResponse(
+        status="ok",
+        uptime_seconds=round(uptime, 2),
+        timestamp=time.time(),
+    )
+
+
+@app.get("/ready", response_model=ReadinessResponse)
+def readiness_check():
+    """Readiness probe confirming the simulation loop and detector are operational."""
+    with runner.frame_lock:
+        worker_alive = runner.worker_thread is not None and runner.worker_thread.is_alive()
+        detector_ready = runner.detector is not None
+        ready = bool(worker_alive and detector_ready)
+        return ReadinessResponse(
+            ready=ready,
+            worker_alive=worker_alive,
+            detector_ready=detector_ready,
+            frames_processed=runner.current_frame_idx,
+            fps=float(runner.latest_telemetry.get("fps", 0.0)),
+            tracking_error_px=float(runner.latest_telemetry.get("tracking_error_px", 0.0)),
+        )
+
 
 @app.get("/api/stream")
 def video_stream():

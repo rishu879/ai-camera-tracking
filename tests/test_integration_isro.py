@@ -22,9 +22,9 @@ def test_isro_benchmark_1_closed_loop():
     - Acquisition time <= 2.0s
     """
     orchestrator = FSOCTrackingOrchestrator(profile_name="isro_benchmark_1")
-    # Run 90 frames (3.0 seconds of closed-loop servoing)
+    # Run 120 frames (4.0 seconds of closed-loop servoing)
     results = orchestrator.run_simulation(
-        num_frames=90,
+        num_frames=120,
         session_name="unit_test_isro_benchmark_1",
         export_video=True,
         simulate_occlusion_interval=None,
