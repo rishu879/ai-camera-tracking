@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FSOC Coarse Tracking Benchmark - test_eval</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { color: #38bdf8; margin-bottom: 5px; }
+        .badge { background: #27ae60; color: white; padding: 6px 14px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
+        .card .title { font-size: 13px; color: #94a3b8; }
+        .card .val { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
+        .plot-container { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 1px solid #334155; }
+        img { max-width: 100%; height: auto; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FSOC Virtual Camera Tracking Benchmark</h1>
+        <p style="color: #94a3b8;">Session: test_eval | ISRO Smart India Hackathon Evaluation</p>
+        <div class="badge">PASSED (ISRO Compliant)</div>
+
+        <div class="grid">
+            <div class="card"><div class="title">RMSE Tracking Error</div><div class="val">6.42 px</div></div>
+            <div class="card"><div class="title">Average Speed</div><div class="val">105.8 FPS</div></div>
+            <div class="card"><div class="title">Lock Retention Rate</div><div class="val">98.3%</div></div>
+            <div class="card"><div class="title">Acquisition Time</div><div class="val">0.045 s</div></div>
+        </div>
+
+        <div class="plot-container"><h3>Tracking Centroid Error</h3><img src="tracking_error.png"></div>
+        <div class="plot-container"><h3>Processing Throughput (FPS)</h3><img src="fps_throughput.png"></div>
+        <div class="plot-container"><h3>2D Spatial Trajectory</h3><img src="trajectory_comparison.png"></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  configuration:
+    build:
+      context: .
+      dockerfile: tools/configuration/Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./tools/configuration/presets:/app/tools/configuration/presets
+    restart: unless-stopped
+
+  logging:
+    build:
+      context: .
+      dockerfile: tools/logging/Dockerfile
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./outputs/logs:/app/outputs/logs
+    restart: unless-stopped
+
+  simulator:
+    build:
+      context: .
+      dockerfile: tools/simulator/Dockerfile
+    ports:
+      - "8003:8003"
+    depends_on:
+      - configuration
+    restart: unless-stopped
+
+  virtual_camera:
+    build:
+      context: .
+      dockerfile: tools/virtual_camera/Dockerfile
+    ports:
+      - "8004:8004"
+    depends_on:
+      - simulator
+    restart: unless-stopped
+
+  weather_engine:
+    build:
+      context: .
+      dockerfile: tools/weather_engine/Dockerfile
+    ports:
+      - "8005:8005"
+    restart: unless-stopped
+
+  noise_generator:
+    build:
+      context: .
+      dockerfile: tools/noise_generator/Dockerfile
+    ports:
+      - "8006:8006"
+    restart: unless-stopped
+
+  object_detection:
+    build:
+      context: .
+      dockerfile: tools/object_detection/Dockerfile
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./models:/app/models
+    restart: unless-stopped
+
+  object_tracking:
+    build:
+      context: .
+      dockerfile: tools/object_tracking/Dockerfile
+    ports:
+      - "8008:8008"
+    restart: unless-stopped
+
+  kalman_prediction:
+    build:
+      context: .
+      dockerfile: tools/kalman_prediction/Dockerfile
+    ports:
+      - "8009:8009"
+    restart: unless-stopped
+
+  pid_controller:
+    build:
+      context: .
+      dockerfile: tools/pid_controller/Dockerfile
+    ports:
+      - "8010:8010"
+    restart: unless-stopped
+
+  dataset_generator:
+    build:
+      context: .
+      dockerfile: tools/dataset_generator/Dockerfile
+    ports:
+      - "8011:8011"
+    volumes:
+      - ./datasets:/app/datasets
+    restart: unless-stopped
+
+  performance_monitor:
+    build:
+      context: .
+      dockerfile: tools/performance_monitor/Dockerfile
+    ports:
+      - "8012:8012"
+    restart: unless-stopped
+
+  analytics:
+    build:
+      context: .
+      dockerfile: tools/analytics/Dockerfile
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./outputs/reports:/app/outputs/reports
+    restart: unless-stopped
+
+  replay_system:
+    build:
+      context: .
+      dockerfile: tools/replay_system/Dockerfile
+    ports:
+      - "8014:8014"
+    volumes:
+      - ./outputs:/app/outputs
+      - ./datasets:/app/datasets
+    restart: unless-stopped

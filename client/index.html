@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISRO FSOC Virtual Camera Tracking Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Aerospace Header -->
+        <header class="mission-header">
+            <div class="header-brand">
+                <div class="logo-badge">ISRO</div>
+                <div class="title-block">
+                    <h1>FSOC COARSE POINTING & TRACKING CONSOLE</h1>
+                    <p class="subtitle">AI-Assisted Virtual Pan-Tilt Camera Gimbal Servoing for Mobile Optical Terminals</p>
+                </div>
+            </div>
+            <div class="system-status-badges">
+                <div class="status-indicator live-beacon">
+                    <span class="pulse-dot"></span>
+                    <span id="system-status-text">CLOSED-LOOP SERVO: ACTIVE</span>
+                </div>
+                <div class="status-indicator isro-badge" id="isro-compliance-badge">
+                    ISRO SPEC: COMPLIANT
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Console Layout -->
+        <main class="console-grid">
+            <!-- Left: Video Stream & Telemetry HUD -->
+            <section class="viewport-section glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon">◉</span> OPTICAL SENSOR FEED (640x480 @ 30 FPS)</h2>
+                    <div class="viewport-controls">
+                        <button class="btn btn-outline btn-sm" id="btn-toggle-tracking">Pause Servo</button>
+                        <button class="btn btn-outline btn-sm" id="btn-inject-occlusion">Inject Cloud Occlusion</button>
+                        <button class="btn btn-danger btn-sm" id="btn-reset">Reset Gimbal</button>
+                    </div>
+                </div>
+
+                <div class="stream-wrapper">
+                    <img id="live-stream" src="/api/stream" alt="Optical Sensor Feed" />
+                    <div class="reticle-info-overlay">
+                        <div>BORESIGHT: [320, 240]</div>
+                        <div>TOLERANCE RING: &le; 10 px</div>
+                    </div>
+                </div>
+
+                <!-- Real-time Metric Telemetry Cards -->
+                <div class="telemetry-bar">
+                    <div class="telemetry-card">
+                        <span class="label">TRACKING ERROR</span>
+                        <span class="value" id="tel-error">-- px</span>
+                        <span class="sub" id="tel-error-status">ISRO LIMIT: &le; 10 px</span>
+                    </div>
+                    <div class="telemetry-card">
+                        <span class="label">PROCESSING SPEED</span>
+                        <span class="value" id="tel-fps">-- FPS</span>
+                        <span class="sub">ISRO LIMIT: &ge; 20 FPS</span>
+                    </div>
+                    <div class="telemetry-card">
+                        <span class="label">LOCK RETENTION</span>
+                        <span class="value" id="tel-lock">-- %</span>
+                        <span class="sub">ISRO LIMIT: &gt; 95%</span>
+                    </div>
+                    <div class="telemetry-card">
+                        <span class="label">GIMBAL PAN / TILT</span>
+                        <span class="value" id="tel-ptz">0.00° / 0.00°</span>
+                        <span class="sub">MAX SLEW: 5.0°/s</span>
+                    </div>
+                    <div class="telemetry-card">
+                        <span class="label">LATENCY / CPU</span>
+                        <span class="value" id="tel-latency">-- ms</span>
+                        <span class="sub" id="tel-cpu">CPU: --%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Interactive Control Tabs -->
+            <section class="controls-section glass-panel">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="tab-environment">ENVIRONMENT</button>
+                    <button class="tab-btn" data-tab="tab-target">TARGET & GIMBAL</button>
+                    <button class="tab-btn" data-tab="tab-benchmarks">BENCHMARKS</button>
+                    <button class="tab-btn" data-tab="tab-reports">REPORTS</button>
+                </div>
+
+                <div class="tab-content">
+                    <!-- Tab 1: Atmospheric & Noise -->
+                    <div class="tab-pane active" id="tab-environment">
+                        <h3>ATMOSPHERIC DISTURBANCES (TOOL 7)</h3>
+                        <div class="control-group">
+                            <label>Fog Density: <span class="val-display" id="val-fog">0.0</span></label>
+                            <input type="range" id="slider-fog" min="0" max="1" step="0.05" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Rain Intensity: <span class="val-display" id="val-rain">0.0</span></label>
+                            <input type="range" id="slider-rain" min="0" max="1" step="0.05" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Snow Intensity: <span class="val-display" id="val-snow">0.0</span></label>
+                            <input type="range" id="slider-snow" min="0" max="1" step="0.05" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Atmospheric Haze: <span class="val-display" id="val-haze">0.0</span></label>
+                            <input type="range" id="slider-haze" min="0" max="1" step="0.05" value="0">
+                        </div>
+                        <div class="control-group checkbox-group">
+                            <label><input type="checkbox" id="chk-lowlight"> Night / Low-Light Illumination</label>
+                        </div>
+
+                        <hr class="divider">
+
+                        <h3>SENSOR NOISE & BLURS (TOOL 8)</h3>
+                        <div class="control-group">
+                            <label>Gaussian Noise (Std Dev): <span class="val-display" id="val-gaussian">0 px</span></label>
+                            <input type="range" id="slider-gaussian" min="0" max="20" step="1" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Salt & Pepper Noise: <span class="val-display" id="val-saltpepper">0%</span></label>
+                            <input type="range" id="slider-saltpepper" min="0" max="0.10" step="0.01" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Motion Blur Kernel: <span class="val-display" id="val-motionblur">0 px</span></label>
+                            <input type="range" id="slider-motionblur" min="0" max="15" step="1" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Camera Defocus Blur: <span class="val-display" id="val-camerablur">0 px</span></label>
+                            <input type="range" id="slider-camerablur" min="0" max="5" step="0.5" value="0">
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Target & Camera -->
+                    <div class="tab-pane" id="tab-target">
+                        <h3>TARGET KINEMATICS (TOOL 1)</h3>
+                        <div class="control-group">
+                            <label>Trajectory Motion Profile:</label>
+                            <select id="select-motion" class="form-select">
+                                <option value="figure_8">Figure-of-8 (Lemniscate) [ISRO Default]</option>
+                                <option value="circular">Circular Orbit</option>
+                                <option value="straight">Straight Line Bounce</option>
+                                <option value="sinusoidal">Harmonic Sinusoidal</option>
+                                <option value="spiral">Archimedean Spiral</option>
+                                <option value="random">Ornstein-Uhlenbeck Random Drift</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Target Speed: <span class="val-display" id="val-speed">25 px/s</span></label>
+                            <input type="range" id="slider-speed" min="5" max="120" step="5" value="25">
+                        </div>
+
+                        <hr class="divider">
+
+                        <h3>GIMBAL SLEW CONSTRAINTS (TOOL 2 & 6)</h3>
+                        <div class="control-group">
+                            <label>Max Pan Slew Speed (ISRO: 5-10°/s): <span class="val-display" id="val-panspeed">5.0°/s</span></label>
+                            <input type="range" id="slider-panspeed" min="1" max="12" step="0.5" value="5.0">
+                        </div>
+                        <div class="control-group">
+                            <label>Max Tilt Slew Speed (ISRO: 5-10°/s): <span class="val-display" id="val-tiltspeed">5.0°/s</span></label>
+                            <input type="range" id="slider-tiltspeed" min="1" max="12" step="0.5" value="5.0">
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Benchmarks -->
+                    <div class="tab-pane" id="tab-benchmarks">
+                        <h3>ISRO BENCHMARK-1 (CLOSED LOOP)</h3>
+                        <p class="desc">Executes an automated closed-loop evaluation against ISRO criteria (Figure-8 motion, jitter, noise, fog) and generates a complete PDF scorecard.</p>
+                        <div class="btn-row">
+                            <button class="btn btn-primary" id="btn-run-benchmark1">Run Benchmark-1 (180 Frames)</button>
+                        </div>
+                        <div id="benchmark1-status" class="status-msg"></div>
+
+                        <hr class="divider">
+
+                        <h3>ISRO BENCHMARK-2 (VIDEO INGESTION)</h3>
+                        <p class="desc">Bypasses the PTZ camera simulator and feeds an external recorded MP4 video directly into coarse pointing to compare centroiding error against ground truth.</p>
+                        <div class="control-group">
+                            <label>Select Test Video (.mp4):</label>
+                            <input type="file" id="bench2-file" accept="video/mp4" class="form-input-file">
+                        </div>
+                        <button class="btn btn-secondary" id="btn-run-benchmark2">Upload & Evaluate Video</button>
+                        <div id="benchmark2-status" class="status-msg"></div>
+                    </div>
+
+                    <!-- Tab 4: Reports -->
+                    <div class="tab-pane" id="tab-reports">
+                        <h3>GENERATED EVALUATION REPORTS</h3>
+                        <p class="desc">Automated PDF reports with embedded diagnostic plots and ISRO compliance scorecards.</p>
+                        <button class="btn btn-outline btn-sm" id="btn-refresh-reports">Refresh Archive</button>
+                        <div id="reports-list" class="reports-grid">
+                            <div class="loading-text">Loading report archive...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

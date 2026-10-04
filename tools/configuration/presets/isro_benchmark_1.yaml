@@ -1,0 +1,67 @@
+profile_name: isro_benchmark_1
+screen:
+  width: 2048
+  height: 2048
+target:
+  num_targets: 1
+  shape: square
+  size:
+  - 10
+  - 10
+  initial_position: null
+  motion_type: figure_8
+  speed: 30.0
+  intensity: 255.0
+camera:
+  camera_type: monochrome
+  resolution:
+  - 640
+  - 480
+  fov:
+  - 4.0
+  - 3.0
+  fps: 30.0
+  max_pan_speed: 5.0
+  max_tilt_speed: 5.0
+  jitter_max_px: 5.0
+  platform_motion_type: linear
+  platform_motion_max_px: 5.0
+weather:
+  fog_density: 0.0
+  rain_intensity: 0.0
+  snow_intensity: 0.0
+  haze_density: 0.0
+  low_light: false
+  brightness: 1.0
+  contrast: 1.0
+noise:
+  gaussian_std: 2.0
+  salt_pepper_ratio: 0.01
+  poisson_enabled: false
+  motion_blur_kernel: 0
+  camera_blur_sigma: 0.0
+detector:
+  model_type: adaptive
+  confidence_threshold: 0.35
+  model_path: models/yolov11_beacon.onnx
+tracker:
+  tracker_type: bytetrack
+  track_thresh: 0.4
+  match_thresh: 0.7
+  max_lost_frames: 30
+kalman:
+  model_type: constant_acceleration
+  process_noise_std: 0.5
+  measurement_noise_std: 1.0
+  prediction_steps: 2
+pid:
+  kp_pan: 0.035
+  ki_pan: 0.002
+  kd_pan: 0.012
+  kp_tilt: 0.035
+  ki_tilt: 0.002
+  kd_tilt: 0.012
+  max_pan_speed_deg: 5.0
+  max_tilt_speed_deg: 5.0
+  anti_windup_limit: 2.0
+  deadband_px: 0.5
