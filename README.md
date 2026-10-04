@@ -89,3 +89,15 @@ Launches all 14 independent microservices with REST APIs and volume mounts.
 - [02 System Architecture & Design](docs/02_System_Architecture.md)
 - [03 User Manual & API Reference](docs/03_User_Manual.md)
 - [04 Benchmark Evaluation Guide](docs/04_Benchmark_Evaluation_Guide.md)
+
+
+Review the UI/UX and suggest improvements.
+Test the user flow and point out bugs.
+Write a professional project description for your resume or GitHub.
+Create a README.md for the project.
+Suggest features and improvements.
+Help optimize it for placements or hackathons.
+Suggest a modern landing page design.
+Check responsiveness and accessibility.
+Help prepare a project presentation or demo script.
+URL :-  https://ai-camera-tracking.antideploy.app/
