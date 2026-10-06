@@ -35,12 +35,12 @@ Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "  MISSION CONTROL CONSOLE READY!" -ForegroundColor Green
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "  * Host PC Browser:    http://localhost:5173" -ForegroundColor White
-Write-Host "  * Phone / Wi-Fi URL:  http://$($lanIP):5173" -ForegroundColor Yellow
+Write-Host "  * Host PC Browser:    http://localhost:8000" -ForegroundColor White
+Write-Host "  * Phone / Wi-Fi URL:  http://$($lanIP):8000" -ForegroundColor Yellow
 Write-Host "  * Direct Backend:     http://$($lanIP):8000" -ForegroundColor White
 Write-Host "  * Health Check:       http://$($lanIP):8000/health" -ForegroundColor White
 Write-Host "  * Swagger API Docs:   http://$($lanIP):8000/docs" -ForegroundColor White
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Launching Vite development server (Press Ctrl+C to stop)..." -ForegroundColor Gray
-npx vite --host 0.0.0.0 --port 5173
+Write-Host "Starting Mission Control server on port 8000 (Press Ctrl+C to stop)..." -ForegroundColor Gray
+& $py "server.py"

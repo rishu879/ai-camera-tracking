@@ -31,15 +31,14 @@ function Test-Check {
     }
 }
 
-# 1. Node.js check
-Test-Check -Name "Node.js >= 20.x" -CheckBlock {
-    $nodeVer = (node -v) 2>$null
-    if ($nodeVer -match "v(\d+)\.") {
-        $major = [int]$matches[1]
-        if ($major -ge 20) { return "Found $nodeVer" }
+# 1. Python environment check (primary)
+Test-Check -Name "Python >= 3.10" -CheckBlock {
+    $pyVer = (python --version) 2>$null
+    if ($pyVer -match "3\.(\d+)") {
+        if ([int]$matches[1] -ge 10) { return "Found $pyVer" }
     }
     return $null
-} -FixHint "Install Node.js 20 or higher from https://nodejs.org"
+} -FixHint "Install Python 3.10 or higher"
 
 # 2. Python .venv check
 Test-Check -Name "Python Virtual Environment (.venv)" -CheckBlock {
@@ -59,13 +58,13 @@ Test-Check -Name "Python Core Modules (FastAPI, OpenCV, NumPy, SciPy)" -CheckBlo
     return $null
 } -FixHint "Run: .\.venv\Scripts\pip.exe install -r requirements.txt"
 
-# 4. Node modules check
-Test-Check -Name "Frontend Dependencies (node_modules/vite)" -CheckBlock {
-    if (Test-Path ".\node_modules\vite") {
-        return "Vite installed"
+# 4. Frontend assets check
+Test-Check -Name "Frontend Web Assets (client/index.html)" -CheckBlock {
+    if (Test-Path ".\client\index.html") {
+        return "Frontend console assets verified"
     }
     return $null
-} -FixHint "Run: npm install"
+} -FixHint "Ensure client/ directory with index.html exists"
 
 # 5. Environment configuration (.env)
 Test-Check -Name "Environment Configuration (.env)" -CheckBlock {
@@ -109,8 +108,8 @@ Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "  Doctor Summary Complete" -ForegroundColor Cyan
 if ($script:lanIP) {
-    Write-Host "  Your Localhost URL:    http://localhost:5173" -ForegroundColor White
-    Write-Host "  Your LAN Wi-Fi URL:    http://$($script:lanIP):5173" -ForegroundColor Green
-    Write-Host "  Direct FastAPI URL:    http://$($script:lanIP):8000" -ForegroundColor Green
+    Write-Host "  Mission Control URL:    http://localhost:8000" -ForegroundColor Green
+    Write-Host "  Network / Wi-Fi URL:    http://$($script:lanIP):8000" -ForegroundColor Green
+    Write-Host "  Health Check URL:       http://$($script:lanIP):8000/health" -ForegroundColor White
 }
 Write-Host "================================================================" -ForegroundColor Cyan

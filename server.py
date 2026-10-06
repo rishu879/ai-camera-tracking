@@ -80,9 +80,13 @@ class SystemRunner:
         self.latest_telemetry: Dict[str, Any] = {}
         self.frame_lock = threading.Lock()
         self.worker_thread: Optional[threading.Thread] = None
+        self.last_active_time = time.time()
 
         # Initialize simulation and launch worker loop
         self.reset_system()
+
+    def touch_activity(self):
+        self.last_active_time = time.time()
 
     def reset_system(self):
         with self.frame_lock:
@@ -94,6 +98,7 @@ class SystemRunner:
             self.monitor.reset()
             self.current_frame_idx = 0
             self.is_occluded_sim = False
+            self.last_active_time = time.time()
 
         if self.worker_thread is None or not self.worker_thread.is_alive():
             self.is_running = True
@@ -101,13 +106,14 @@ class SystemRunner:
             self.worker_thread.start()
 
     def _loop(self):
-        fps = 30.0
-        interval = 1.0 / fps
         cam_w, cam_h = self.cam.config.resolution
         boresight_center = (cam_w / 2.0, cam_h / 2.0)
 
         while self.is_running:
             t0 = time.perf_counter()
+            is_active = (time.time() - self.last_active_time) < 20.0
+            fps = 30.0 if is_active else 2.0
+            interval = 1.0 / fps
             try:
                 self.current_frame_idx += 1
 
@@ -190,15 +196,17 @@ class SystemRunner:
                     "tilt_deg": round(self.cam.tilt_deg, 2),
                 }
 
-                hud_frame = draw_telemetry_hud(
-                    noisy_frame,
-                    telemetry=tel_dict,
-                    target_pos=current_target_pos,
-                    predicted_pos=tuple(kal_out.future_positions[0]) if kal_out.future_positions else None,
-                    bbox=tuple(active_track.bbox) if active_track else None,
-                )
-
-                jpeg_bytes = encode_image_jpeg(hud_frame, quality=80)
+                if is_active or self.latest_frame_jpeg is None:
+                    hud_frame = draw_telemetry_hud(
+                        noisy_frame,
+                        telemetry=tel_dict,
+                        target_pos=current_target_pos,
+                        predicted_pos=tuple(kal_out.future_positions[0]) if kal_out.future_positions else None,
+                        bbox=tuple(active_track.bbox) if active_track else None,
+                    )
+                    jpeg_bytes = encode_image_jpeg(hud_frame, quality=80)
+                else:
+                    jpeg_bytes = self.latest_frame_jpeg
 
                 with self.frame_lock:
                     self.latest_frame_jpeg = jpeg_bytes
@@ -223,9 +231,9 @@ class SystemRunner:
                 print(f"[ERROR in _loop]: {loop_err}", flush=True)
                 traceback.print_exc()
 
-            # Maintain ~30 FPS loop rate
+            # Maintain loop rate with minimum cooperative yield
             elapsed = time.perf_counter() - t0
-            sleep_time = max(0.001, interval - elapsed)
+            sleep_time = max(0.005, interval - elapsed)
             time.sleep(sleep_time)
 
 
@@ -283,6 +291,7 @@ def video_stream():
     def frame_gen():
         try:
             while True:
+                runner.touch_activity()
                 with runner.frame_lock:
                     frame_bytes = runner.latest_frame_jpeg
                 if frame_bytes:
@@ -299,6 +308,7 @@ def video_stream():
 
 @app.get("/api/state")
 def get_system_state():
+    runner.touch_activity()
     with runner.frame_lock:
         return runner.latest_telemetry
 
